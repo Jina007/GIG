@@ -1,0 +1,20 @@
+{
+  "name": "cooperative-gig-services-platform",
+  "version": "1.0.0",
+  "description": "SIH26089: Cooperative Gig Services Platform for Household & Community Services",
+  "main": "server/server.js",
+  "scripts": {
+    "dev": "concurrently \"npm run dev:server\" \"npm run dev:client\"",
+    "dev:server": "node --watch server/server.js",
+    "dev:client": "npm --prefix client run dev",
+    "seed": "node server/seed.js",
+    "build": "npm --prefix client run build",
+    "start": "node server/server.js"
+  },
+  "dependencies": {
+    "concurrently": "^9.1.2"
+  },
+  "keywords": ["cooperative", "gig-economy", "labour-society", "community-services", "sih26089"],
+  "author": "SIH Team",
+  "license": "MIT"
+}
