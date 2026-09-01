@@ -422,7 +422,13 @@ export const BookingDetailsView: React.FC<BookingDetailsViewProps> = ({ bookingI
       )}
 
       {/* Invoice Modal */}
-      <InvoiceModal invoice={invoice} onClose={() => setShowInvoiceModal(false)} />
+      {showInvoiceModal && (
+        <InvoiceModal
+          isOpen={showInvoiceModal}
+          invoice={invoice}
+          onClose={() => setShowInvoiceModal(false)}
+        />
+      )}
 
       {/* Complaint Modal */}
       {showComplaintModal && (
