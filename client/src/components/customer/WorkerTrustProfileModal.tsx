@@ -12,8 +12,10 @@ import {
   X,
   MapPin,
   Briefcase,
+  CreditCard,
 } from 'lucide-react';
 import { TrustBadge } from '../common/TrustBadge';
+import { MembershipCardModal } from '../common/MembershipCardModal';
 
 interface WorkerTrustProfileModalProps {
   workerId: string | null;
@@ -28,6 +30,7 @@ export const WorkerTrustProfileModal: React.FC<WorkerTrustProfileModalProps> = (
 }) => {
   const [profileData, setProfileData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [showMemberCardModal, setShowMemberCardModal] = useState(false);
 
   useEffect(() => {
     if (!workerId) return;
@@ -149,17 +152,29 @@ export const WorkerTrustProfileModal: React.FC<WorkerTrustProfileModalProps> = (
         )}
 
         {/* Footer */}
-        <div className="p-4 bg-slate-50 border-t border-slate-200 flex items-center justify-between">
-          <button onClick={onClose} className="px-4 py-2 text-slate-600 font-bold text-xs">
-            Close
-          </button>
+        <div className="p-4 bg-slate-50 border-t border-slate-200 flex flex-wrap items-center justify-between gap-2">
+          <div className="flex items-center gap-2">
+            <button onClick={onClose} className="px-4 py-2 text-slate-600 font-bold text-xs hover:text-slate-900">
+              Close
+            </button>
+            {profileData && (
+              <button
+                onClick={() => setShowMemberCardModal(true)}
+                className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-300 text-xs font-bold transition-all active:scale-95"
+              >
+                <CreditCard className="w-3.5 h-3.5 text-amber-600" />
+                <span>View Cooperative ID Card</span>
+              </button>
+            )}
+          </div>
+
           {onBookNow && profileData && (
             <button
               onClick={() => {
                 onClose();
                 onBookNow(profileData.worker);
               }}
-              className="px-6 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs sm:text-sm shadow-xs"
+              className="px-6 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs sm:text-sm shadow-xs transition-all active:scale-95"
             >
               Book {profileData.worker.name.split(' ')[0]}
             </button>
@@ -167,6 +182,23 @@ export const WorkerTrustProfileModal: React.FC<WorkerTrustProfileModalProps> = (
         </div>
 
       </div>
+
+      {showMemberCardModal && profileData && (
+        <MembershipCardModal
+          isOpen={showMemberCardModal}
+          onClose={() => setShowMemberCardModal(false)}
+          targetUser={{
+            id: profileData.worker.id,
+            name: profileData.worker.name,
+            role: 'worker',
+            avatar: profileData.worker.avatar,
+            cooperative_name: profileData.worker.cooperative_name,
+            community_name: profileData.worker.community_name,
+            cooperative_reg_no: profileData.worker.cooperative_reg_no,
+          }}
+        />
+      )}
+
     </div>
   );
 };

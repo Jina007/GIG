@@ -14,6 +14,7 @@ import {
   Star,
 } from 'lucide-react';
 import { TrustBadge } from '../common/TrustBadge';
+import { AddWorkerModal } from './AddWorkerModal';
 
 export const WorkerVerificationTable: React.FC = () => {
   const { user } = useAuth();
@@ -22,6 +23,7 @@ export const WorkerVerificationTable: React.FC = () => {
   const [search, setSearch] = useState<string>('');
   const [loading, setLoading] = useState<boolean>(true);
   const [updatingId, setUpdatingId] = useState<string | null>(null);
+  const [showAddModal, setShowAddModal] = useState<boolean>(false);
 
   const fetchWorkers = async () => {
     const coopId = user?.cooperative_id || 'coop-cbe-1';
@@ -83,7 +85,7 @@ export const WorkerVerificationTable: React.FC = () => {
         </div>
 
         {/* Search & Filter Controls */}
-        <div className="flex items-center gap-2 w-full sm:w-auto">
+        <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto">
           <input
             type="text"
             value={search}
@@ -105,8 +107,22 @@ export const WorkerVerificationTable: React.FC = () => {
               </button>
             ))}
           </div>
+
+          <button
+            onClick={() => setShowAddModal(true)}
+            className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs shadow-xs transition-all active:scale-95 shrink-0"
+          >
+            <UserCheck className="w-4 h-4" />
+            <span>+ Onboard Worker</span>
+          </button>
         </div>
       </div>
+
+      <AddWorkerModal
+        isOpen={showAddModal}
+        onClose={() => setShowAddModal(false)}
+        onWorkerAdded={() => fetchWorkers()}
+      />
 
       {/* Workers Verification Table */}
       <div className="bg-white border border-slate-200 rounded-3xl overflow-hidden shadow-xs">

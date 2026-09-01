@@ -23,6 +23,8 @@ import { SocietyAnnouncementsManager } from './components/cooperative/SocietyAnn
 import { FederationDashboard } from './components/federation/FederationDashboard';
 import { EscalatedDisputesDesk } from './components/federation/EscalatedDisputesDesk';
 import { SuperAdminDashboard } from './components/superadmin/SuperAdminDashboard';
+import { MembershipCardModal } from './components/common/MembershipCardModal';
+import { AddWorkerModal } from './components/cooperative/AddWorkerModal';
 import { ServiceCategory, Worker } from './types';
 
 export const App: React.FC = () => {
@@ -38,6 +40,8 @@ export const App: React.FC = () => {
   const [matchingCategory, setMatchingCategory] = useState<ServiceCategory | null>(null);
   const [matchingIsEmergency, setMatchingIsEmergency] = useState<boolean>(false);
   const [matchingPreselectedWorker, setMatchingPreselectedWorker] = useState<Worker | null>(null);
+  const [showMemberCardModal, setShowMemberCardModal] = useState<boolean>(false);
+  const [showAddWorkerModal, setShowAddWorkerModal] = useState<boolean>(false);
 
   // Keep track of active booking for seamless multi-role simulation
   const [latestActiveBookingId, setLatestActiveBookingId] = useState<string | null>(null);
@@ -143,6 +147,8 @@ export const App: React.FC = () => {
           setActiveTab(tab);
         }}
         onEmergencyClick={handleEmergencyClick}
+        onOpenMemberCard={() => setShowMemberCardModal(true)}
+        onOpenAddWorker={() => setShowAddWorkerModal(true)}
       />
 
       {/* Main Content Area with RBAC View Rendering */}
@@ -246,6 +252,21 @@ export const App: React.FC = () => {
           onViewTrustProfile={(w) => setTrustModalWorkerId(w.id)}
         />
       )}
+
+      {/* Official Cooperative Digital Membership Identity Card */}
+      <MembershipCardModal
+        isOpen={showMemberCardModal}
+        onClose={() => setShowMemberCardModal(false)}
+      />
+
+      {/* Cooperative Admin Onboard Worker Modal */}
+      <AddWorkerModal
+        isOpen={showAddWorkerModal}
+        onClose={() => setShowAddWorkerModal(false)}
+        onWorkerAdded={() => {
+          // If viewing verification or capacity, state automatically refreshes
+        }}
+      />
 
       {/* Footer */}
       <Footer />

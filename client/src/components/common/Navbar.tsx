@@ -20,15 +20,25 @@ import {
   Megaphone,
   Heart,
   Scale,
+  CreditCard,
+  UserPlus,
 } from 'lucide-react';
 
 interface NavbarProps {
   activeTab: string;
   setActiveTab: (tab: string) => void;
   onEmergencyClick: () => void;
+  onOpenMemberCard?: () => void;
+  onOpenAddWorker?: () => void;
 }
 
-export const Navbar: React.FC<NavbarProps> = ({ activeTab, setActiveTab, onEmergencyClick }) => {
+export const Navbar: React.FC<NavbarProps> = ({
+  activeTab,
+  setActiveTab,
+  onEmergencyClick,
+  onOpenMemberCard,
+  onOpenAddWorker,
+}) => {
   const {
     user,
     selectedRegionId,
@@ -39,7 +49,7 @@ export const Navbar: React.FC<NavbarProps> = ({ activeTab, setActiveTab, onEmerg
   } = useAuth();
   const { t } = useLanguage();
 
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [showNotifs, setShowNotifs] = useState(false);
 
   const regions = [
@@ -56,6 +66,7 @@ export const Navbar: React.FC<NavbarProps> = ({ activeTab, setActiveTab, onEmerg
         { id: 'map', label: 'Explore Map', icon: Map },
         { id: 'favorites', label: 'Favorite Workers', icon: Heart },
         { id: 'complaints', label: 'Support & Disputes', icon: FileText },
+        { id: 'member-card', label: 'Member Card', icon: CreditCard },
       ];
     }
     if (user.role === 'worker') {
@@ -63,12 +74,14 @@ export const Navbar: React.FC<NavbarProps> = ({ activeTab, setActiveTab, onEmerg
         { id: 'worker-dashboard', label: 'Jobs & Live Queue', icon: Briefcase },
         { id: 'worker-welfare', label: 'Welfare & Insurance', icon: HeartHandshake },
         { id: 'announcements', label: 'Society Notices', icon: Megaphone },
+        { id: 'member-card', label: 'Member Card', icon: CreditCard },
       ];
     }
     if (user.role === 'cooperative_admin') {
       return [
         { id: 'coop-dashboard', label: 'Dashboard', icon: Building2 },
         { id: 'coop-verification', label: 'Verify Workers', icon: ShieldCheck },
+        { id: 'coop-add-worker', label: '+ Onboard Worker', icon: UserPlus },
         { id: 'coop-allocation', label: 'Workforce Capacity', icon: Users },
         { id: 'ai-forecast', label: 'AI Demand Forecast', icon: Sparkles },
         { id: 'coop-complaints', label: 'Complaints Mediation', icon: FileText },
@@ -85,6 +98,17 @@ export const Navbar: React.FC<NavbarProps> = ({ activeTab, setActiveTab, onEmerg
   };
 
   const navLinks = getNavLinks();
+
+  const handleLinkClick = (linkId: string) => {
+    if (linkId === 'member-card') {
+      if (onOpenMemberCard) onOpenMemberCard();
+    } else if (linkId === 'coop-add-worker') {
+      if (onOpenAddWorker) onOpenAddWorker();
+    } else {
+      setActiveTab(linkId);
+    }
+    setMobileMenuOpen(false);
+  };
 
   return (
     <header className="bg-white border-b border-slate-200 sticky top-7 z-40">
@@ -119,7 +143,7 @@ export const Navbar: React.FC<NavbarProps> = ({ activeTab, setActiveTab, onEmerg
               return (
                 <button
                   key={link.id}
-                  onClick={() => setActiveTab(link.id)}
+                  onClick={() => handleLinkClick(link.id)}
                   className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all ${
                     isActive
                       ? 'bg-emerald-50 text-emerald-700 font-bold'
@@ -134,10 +158,34 @@ export const Navbar: React.FC<NavbarProps> = ({ activeTab, setActiveTab, onEmerg
           </nav>
 
           {/* Right Actions */}
-          <div className="flex items-center gap-2.5">
+          <div className="flex items-center gap-2">
             
+            {/* Direct Member Card Button for Customers and Workers */}
+            {(!user || user.role === 'customer' || user.role === 'worker') && (
+              <button
+                onClick={onOpenMemberCard}
+                className="flex items-center gap-1.5 bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-300 font-extrabold text-xs px-3 py-1.5 rounded-xl shadow-2xs transition-all active:scale-95 shrink-0"
+                title="View Official Cooperative Member Identity Card"
+              >
+                <CreditCard className="w-3.5 h-3.5 text-amber-600" />
+                <span className="hidden sm:inline">Member Card</span>
+              </button>
+            )}
+
+            {/* Quick Onboard Worker Button for Cooperative Admins */}
+            {user?.role === 'cooperative_admin' && (
+              <button
+                onClick={onOpenAddWorker}
+                className="flex items-center gap-1.5 bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-xs px-3.5 py-1.5 rounded-xl shadow-xs transition-all active:scale-95 shrink-0"
+                title="Onboard New Society Worker"
+              >
+                <UserPlus className="w-3.5 h-3.5" />
+                <span className="hidden sm:inline">+ Onboard Worker</span>
+              </button>
+            )}
+
             {/* Region Selector */}
-            <div className="flex items-center gap-1 bg-slate-100 px-2.5 py-1.5 rounded-xl text-xs font-semibold text-slate-700">
+            <div className="hidden sm:flex items-center gap-1 bg-slate-100 px-2.5 py-1.5 rounded-xl text-xs font-semibold text-slate-700">
               <MapPin className="w-3.5 h-3.5 text-emerald-600" />
               <select
                 value={selectedRegionId}
@@ -156,11 +204,10 @@ export const Navbar: React.FC<NavbarProps> = ({ activeTab, setActiveTab, onEmerg
             {(!user || user.role === 'customer') && (
               <button
                 onClick={onEmergencyClick}
-                className="flex items-center gap-1.5 bg-red-600 hover:bg-red-700 text-white font-bold text-xs px-3.5 py-2 rounded-xl shadow-xs transition-all active:scale-95"
+                className="flex items-center gap-1.5 bg-red-600 hover:bg-red-700 text-white font-bold text-xs px-3 py-1.5 rounded-xl shadow-xs transition-all active:scale-95"
               >
-                <Zap className="w-4 h-4 fill-white" />
-                <span className="hidden sm:inline">Emergency SOS</span>
-                <span className="sm:hidden">SOS</span>
+                <Zap className="w-3.5 h-3.5 fill-white" />
+                <span className="hidden sm:inline">SOS</span>
               </button>
             )}
 
@@ -180,22 +227,30 @@ export const Navbar: React.FC<NavbarProps> = ({ activeTab, setActiveTab, onEmerg
                 )}
               </button>
 
+              {/* Notification dropdown */}
               {showNotifs && (
-                <div className="absolute right-0 mt-2 w-80 bg-white rounded-2xl shadow-xl border border-slate-200 py-2 z-50 animate-in fade-in zoom-in-95">
-                  <div className="px-4 py-2 border-b border-slate-100 flex items-center justify-between text-xs">
-                    <span className="font-bold text-slate-900">Notifications</span>
-                    <button onClick={markAllNotifsRead} className="text-emerald-600 font-semibold hover:underline">
-                      Mark read
+                <div className="absolute right-0 mt-2 w-80 bg-white rounded-2xl shadow-xl border border-slate-200 p-4 z-50 animate-in fade-in">
+                  <div className="flex items-center justify-between pb-2 border-b border-slate-100">
+                    <span className="font-extrabold text-xs text-slate-900">Notifications</span>
+                    <button
+                      onClick={markAllNotifsRead}
+                      className="text-[10px] font-bold text-emerald-700 hover:underline"
+                    >
+                      Mark all read
                     </button>
                   </div>
-                  <div className="max-h-64 overflow-y-auto divide-y divide-slate-100 text-xs">
+
+                  <div className="divide-y divide-slate-100 max-h-60 overflow-y-auto mt-2 text-xs">
                     {notifications.length === 0 ? (
-                      <div className="p-4 text-center text-slate-400">No notifications</div>
+                      <div className="py-6 text-center text-slate-400">No notifications</div>
                     ) : (
                       notifications.slice(0, 5).map((n) => (
-                        <div key={n.id} className="p-3 hover:bg-slate-50">
-                          <div className="font-bold text-slate-900">{n.title}</div>
-                          <p className="text-slate-500 text-[11px] mt-0.5">{n.message}</p>
+                        <div key={n.id} className="py-2 space-y-0.5">
+                          <p className="font-bold text-slate-900">{n.title}</p>
+                          <p className="text-slate-500 text-[11px] leading-tight">{n.message}</p>
+                          <span className="text-[10px] text-slate-400">
+                            {new Date(n.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                          </span>
                         </div>
                       ))
                     )}
@@ -204,45 +259,46 @@ export const Navbar: React.FC<NavbarProps> = ({ activeTab, setActiveTab, onEmerg
               )}
             </div>
 
-            {/* User Profile avatar */}
-            <div className="flex items-center gap-2 pl-1">
+            {/* Profile Avatar */}
+            <div className="flex items-center gap-2 pl-1 border-l border-slate-200">
               <img
                 src={user?.avatar || 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=150'}
-                alt={user?.name || 'User'}
-                className="w-8 h-8 rounded-full object-cover border border-emerald-500"
+                alt={user?.name}
+                className="w-8 h-8 rounded-xl object-cover border border-emerald-500 shrink-0"
               />
+              <span className="text-xs font-extrabold text-slate-800 hidden xl:inline">
+                {user?.name.split(' ')[0]}
+              </span>
             </div>
 
-            {/* Mobile menu trigger */}
+            {/* Mobile Menu Button */}
             <button
-              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
               className="lg:hidden p-2 rounded-xl text-slate-600 hover:bg-slate-100"
             >
-              {isMobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+              {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
             </button>
 
           </div>
+
         </div>
       </div>
 
-      {/* Mobile Drawer */}
-      {isMobileMenuOpen && (
-        <div className="lg:hidden border-t border-slate-200 bg-white px-4 py-3 space-y-1 shadow-lg">
+      {/* Mobile Menu Dropdown */}
+      {mobileMenuOpen && (
+        <div className="lg:hidden bg-white border-b border-slate-200 px-4 pt-2 pb-4 space-y-1">
           {navLinks.map((link) => {
             const Icon = link.icon;
             const isActive = activeTab === link.id;
             return (
               <button
                 key={link.id}
-                onClick={() => {
-                  setActiveTab(link.id);
-                  setIsMobileMenuOpen(false);
-                }}
-                className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold transition-colors ${
-                  isActive ? 'bg-emerald-50 text-emerald-700 font-bold' : 'text-slate-700 hover:bg-slate-50'
+                onClick={() => handleLinkClick(link.id)}
+                className={`w-full flex items-center gap-2 px-3 py-2.5 rounded-xl text-xs font-bold ${
+                  isActive ? 'bg-emerald-50 text-emerald-700' : 'text-slate-700 hover:bg-slate-50'
                 }`}
               >
-                <Icon className={`w-4 h-4 ${isActive ? 'text-emerald-600' : 'text-slate-400'}`} />
+                <Icon className="w-4 h-4" />
                 <span>{link.label}</span>
               </button>
             );

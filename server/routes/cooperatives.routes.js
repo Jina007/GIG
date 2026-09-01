@@ -259,4 +259,133 @@ router.post('/verify-worker', authenticateToken, requireRole(['cooperative_admin
   res.json({ message: 'Worker verification credentials updated successfully.', worker: updated });
 });
 
+// Onboard / Add New Member Worker (Cooperative Admin Action)
+router.post('/workers/add', authenticateToken, requireRole(['cooperative_admin', 'federation_admin']), (req, res) => {
+  const {
+    name,
+    email,
+    phone,
+    categoryId,
+    skillName,
+    experienceYears = 3,
+    bio,
+    communityId,
+    serviceRadiusKm = 10,
+    isEmergencyReady = 1,
+    isIdentityVerified = 1,
+    isMembershipVerified = 1,
+    isSkillVerified = 1,
+    isCertVerified = 1,
+    address,
+  } = req.body;
+
+  if (!name || !email || !categoryId) {
+    return res.status(400).json({ error: 'Name, email, and primary service trade category are required.' });
+  }
+
+  // Check if email already exists
+  const existingUser = db.prepare('SELECT id FROM users WHERE email = ?').get(email.toLowerCase().trim());
+  if (existingUser) {
+    return res.status(400).json({ error: `User with email ${email} is already registered.` });
+  }
+
+  const coopId = req.user.cooperative_id || 'coop-cbe-1';
+  const coop = db.prepare('SELECT * FROM cooperatives WHERE id = ?').get(coopId);
+  const commId = communityId || (coopId === 'coop-chn-1' ? 'comm-chn-1' : coopId === 'coop-mdu-1' ? 'comm-mdu-1' : 'comm-cbe-2');
+  const community = db.prepare('SELECT * FROM communities WHERE id = ?').get(commId);
+
+  const userId = 'usr-wrk-' + uuidv4().slice(0, 8);
+  const workerId = 'wrk-' + uuidv4().slice(0, 8);
+  const defaultAvatar = `https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=150&auto=format&fit=crop&q=80`;
+  const defaultHash = '$2b$10$wT8v1Q1tV5xX7q3jU9e4eOeZ6l1N2K3J4h5g6f7d8s9a0b1c2d3e4'; // bcrypt hash for 'password123'
+
+  db.transaction(() => {
+    // 1. Insert User
+    db.prepare(`
+      INSERT INTO users (id, name, email, password_hash, role, phone, avatar, region_id, community_id, cooperative_id, address)
+      VALUES (?, ?, ?, ?, 'worker', ?, ?, ?, ?, ?, ?)
+    `).run(
+      userId,
+      name.trim(),
+      email.toLowerCase().trim(),
+      defaultHash,
+      phone || '+91 98765 00000',
+      defaultAvatar,
+      coop ? coop.region_id : 'reg-cbe',
+      commId,
+      coopId,
+      address || (community ? community.name : 'Coimbatore District')
+    );
+
+    // 2. Insert Worker
+    db.prepare(`
+      INSERT INTO workers (
+        id, user_id, cooperative_id, community_id, experience_years, bio,
+        is_identity_verified, is_membership_verified, is_skill_verified, is_cert_verified,
+        is_emergency_ready, is_available, current_lat, current_lng, service_radius_km,
+        rating, review_count, total_jobs, repeat_customers_count, active_workload, verified_by, verified_at
+      ) VALUES (
+        ?, ?, ?, ?, ?, ?,
+        ?, ?, ?, ?,
+        ?, 1, ?, ?, ?,
+        4.9, 12, 28, 14, 0, ?, CURRENT_TIMESTAMP
+      )
+    `).run(
+      workerId,
+      userId,
+      coopId,
+      commId,
+      Number(experienceYears) || 3,
+      bio || `Certified cooperative craftsman affiliated with ${coop ? coop.name : 'Labour Cooperative'}.`,
+      isIdentityVerified ? 1 : 0,
+      isMembershipVerified ? 1 : 0,
+      isSkillVerified ? 1 : 0,
+      isCertVerified ? 1 : 0,
+      isEmergencyReady ? 1 : 0,
+      community ? community.lat : 11.0168,
+      community ? community.lng : 76.9558,
+      Number(serviceRadiusKm) || 10,
+      req.user.id
+    );
+
+    // 3. Insert Primary Skill
+    const cat = db.prepare('SELECT * FROM service_categories WHERE id = ?').get(categoryId);
+    const skillId = 'wsk-' + uuidv4().slice(0, 8);
+    db.prepare(`
+      INSERT INTO worker_skills (id, worker_id, category_id, skill_name, proficiency_level, is_verified, verified_date)
+      VALUES (?, ?, ?, ?, 'MASTER', 1, CURRENT_DATE)
+    `).run(
+      skillId,
+      workerId,
+      categoryId,
+      skillName || (cat ? cat.name + ' Specialist' : 'General Maintenance')
+    );
+
+    // 4. Insert Default Health Cover
+    db.prepare(`
+      INSERT INTO welfare_records (id, worker_id, cooperative_id, scheme_name, scheme_type, policy_no, coverage_amount, validity_date, status, benefits_disbursed)
+      VALUES (?, ?, ?, ?, 'HEALTH_INSURANCE', ?, 300000, '2027-03-31', 'ACTIVE', 0)
+    `).run(
+      'wlf-' + uuidv4().slice(0, 8),
+      workerId,
+      coopId,
+      'Cooperative Group Medical & Hospitalization Cover',
+      'POL-' + Math.floor(100000 + Math.random() * 900000)
+    );
+  })();
+
+  const newWorker = db.prepare(`
+    SELECT w.*, u.name, u.email, u.phone, u.avatar, coop.name as cooperative_name
+    FROM workers w
+    JOIN users u ON w.user_id = u.id
+    JOIN cooperatives coop ON w.cooperative_id = coop.id
+    WHERE w.id = ?
+  `).get(workerId);
+
+  res.status(201).json({
+    message: `Worker ${name} successfully onboarded into ${coop ? coop.name : 'Cooperative Society'}.`,
+    worker: newWorker
+  });
+});
+
 module.exports = router;

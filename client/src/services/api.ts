@@ -120,6 +120,8 @@ export const api = {
       request(`/cooperatives/${id}/workers${statusFilter ? `?status_filter=${statusFilter}` : ''}`),
     verifyWorker: (data: any) =>
       request('/cooperatives/verify-worker', { method: 'POST', body: JSON.stringify(data) }),
+    addWorker: (data: any) =>
+      request('/cooperatives/workers/add', { method: 'POST', body: JSON.stringify(data) }),
   },
 
   // Federation

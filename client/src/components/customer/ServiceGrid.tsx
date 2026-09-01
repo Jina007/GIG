@@ -29,8 +29,10 @@ import {
   ShieldCheck,
   ChevronRight,
   ArrowRight,
+  CreditCard,
 } from 'lucide-react';
 import { TrustBadge } from '../common/TrustBadge';
+import { MembershipCardModal } from '../common/MembershipCardModal';
 
 const iconMap: Record<string, any> = {
   Droplets,
@@ -76,6 +78,7 @@ export const ServiceGrid: React.FC<ServiceGridProps> = ({
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [selectedFilter, setSelectedFilter] = useState<string>('ALL');
   const [loading, setLoading] = useState<boolean>(true);
+  const [showMemberCard, setShowMemberCard] = useState<boolean>(false);
 
   useEffect(() => {
     setLoading(true);
@@ -154,6 +157,20 @@ export const ServiceGrid: React.FC<ServiceGridProps> = ({
               placeholder="Search plumber, electrician, cleaning, AC..."
               className="w-full pl-12 pr-4 py-3.5 rounded-2xl bg-white border border-slate-300 text-slate-900 text-sm shadow-xs focus:outline-hidden focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-all"
             />
+          </div>
+
+          {/* Direct Member Card Trigger */}
+          <div className="pt-3 flex items-center justify-center">
+            <button
+              onClick={() => setShowMemberCard(true)}
+              className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-amber-50 hover:bg-amber-100 border border-amber-300 text-amber-900 text-xs font-extrabold shadow-2xs transition-all active:scale-95"
+            >
+              <CreditCard className="w-3.5 h-3.5 text-amber-600" />
+              <span>View Official Cooperative Patron Card</span>
+              <span className="text-[10px] bg-amber-200 text-amber-950 px-1.5 py-0.2 rounded font-black">
+                Verified
+              </span>
+            </button>
           </div>
         </div>
       </div>
@@ -282,6 +299,11 @@ export const ServiceGrid: React.FC<ServiceGridProps> = ({
           ))}
         </div>
       </div>
+
+      <MembershipCardModal
+        isOpen={showMemberCard}
+        onClose={() => setShowMemberCard(false)}
+      />
 
     </div>
   );
