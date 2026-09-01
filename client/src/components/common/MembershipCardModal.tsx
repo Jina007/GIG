@@ -10,16 +10,12 @@ import {
   CheckCircle2,
   Building,
   MapPin,
-  Calendar,
   Zap,
   Wrench,
   Hammer,
   HeartHandshake,
   Wind,
   Paintbrush,
-  Star,
-  Shield,
-  Phone,
 } from 'lucide-react';
 
 interface MembershipCardModalProps {
@@ -45,7 +41,6 @@ interface MembershipCardModalProps {
 
 interface TradeDetails {
   designation: string;
-  passion: string;
   badgeBg: string;
   badgeBorder: string;
   badgeText: string;
@@ -65,7 +60,6 @@ const getTradeDetails = (skillName?: string, primaryTrade?: string): TradeDetail
   ) {
     return {
       designation: 'CERTIFIED MASTER PLUMBER',
-      passion: 'Sanitary Engineering, Leak Mitigation & Clean Water Security',
       badgeBg: 'bg-sky-950/80',
       badgeBorder: 'border-sky-400/50',
       badgeText: 'text-sky-300',
@@ -83,7 +77,6 @@ const getTradeDetails = (skillName?: string, primaryTrade?: string): TradeDetail
   ) {
     return {
       designation: 'LICENSED MASTER ELECTRICIAN',
-      passion: 'Precision Power Distribution, Circuit Safety & Smart Inverter Systems',
       badgeBg: 'bg-amber-950/80',
       badgeBorder: 'border-amber-400/50',
       badgeText: 'text-amber-300',
@@ -100,7 +93,6 @@ const getTradeDetails = (skillName?: string, primaryTrade?: string): TradeDetail
   ) {
     return {
       designation: 'MASTER ARTISAN & CARPENTER',
-      passion: 'Architectural Woodcraft, Custom Cabinetry & Structural Joinery',
       badgeBg: 'bg-amber-950/80',
       badgeBorder: 'border-amber-500/50',
       badgeText: 'text-amber-200',
@@ -117,7 +109,6 @@ const getTradeDetails = (skillName?: string, primaryTrade?: string): TradeDetail
   ) {
     return {
       designation: 'CERTIFIED COMPASSIONATE CAREGIVER',
-      passion: 'Patient Dignity, Mobility Assistance & Holistic Elderly Wellness',
       badgeBg: 'bg-rose-950/80',
       badgeBorder: 'border-rose-400/50',
       badgeText: 'text-rose-300',
@@ -133,7 +124,6 @@ const getTradeDetails = (skillName?: string, primaryTrade?: string): TradeDetail
   ) {
     return {
       designation: 'HYGIENE & DEEP SANITIZATION SPECIALIST',
-      passion: 'Microbiological Disinfection, Eco Sanitization & Healthy Living Environments',
       badgeBg: 'bg-teal-950/80',
       badgeBorder: 'border-teal-400/50',
       badgeText: 'text-teal-300',
@@ -149,8 +139,7 @@ const getTradeDetails = (skillName?: string, primaryTrade?: string): TradeDetail
     text.includes('hvac')
   ) {
     return {
-      designation: 'HVAC & DOMESTIC APPLIANCE SYSTEMS SPECIALIST',
-      passion: 'Thermal Energy Optimization, Refrigeration Diagnostics & Eco Cooling',
+      designation: 'HVAC & DOMESTIC APPLIANCE SPECIALIST',
       badgeBg: 'bg-cyan-950/80',
       badgeBorder: 'border-cyan-400/50',
       badgeText: 'text-cyan-300',
@@ -161,7 +150,6 @@ const getTradeDetails = (skillName?: string, primaryTrade?: string): TradeDetail
   if (text.includes('paint')) {
     return {
       designation: 'MASTER FINISHER & WALL COATING EXPERT',
-      passion: 'Surface Restoration, Weatherproof Coating & Premium Aesthetic Finishing',
       badgeBg: 'bg-purple-950/80',
       badgeBorder: 'border-purple-400/50',
       badgeText: 'text-purple-300',
@@ -171,7 +159,6 @@ const getTradeDetails = (skillName?: string, primaryTrade?: string): TradeDetail
 
   return {
     designation: 'CERTIFIED COOPERATIVE CRAFTSMAN',
-    passion: 'Artisan Precision, Fair Labour Ethics & Community Infrastructure Maintenance',
     badgeBg: 'bg-emerald-950/80',
     badgeBorder: 'border-emerald-400/50',
     badgeText: 'text-emerald-300',
@@ -188,7 +175,6 @@ export const MembershipCardModal: React.FC<MembershipCardModalProps> = ({
 
   if (!isOpen) return null;
 
-  // Derive worker info either from targetUser (if customer is viewing a worker) or from currently logged-in worker
   const activeWorkerData = targetUser || worker;
   const activeUserData = targetUser || user;
 
@@ -275,8 +261,7 @@ export const MembershipCardModal: React.FC<MembershipCardModalProps> = ({
             </div>
 
             {/* Worker Avatar + Core Trade Designation */}
-            <div className="py-4 space-y-3">
-              
+            <div className="py-5 space-y-3">
               <div className="flex items-center gap-4">
                 <div className="relative shrink-0">
                   <img
@@ -289,10 +274,10 @@ export const MembershipCardModal: React.FC<MembershipCardModalProps> = ({
                   </span>
                 </div>
 
-                <div className="space-y-1">
-                  {/* WORKER'S PASSIONATE TRADE DESIGNATION */}
+                <div className="space-y-1.5">
+                  {/* WORKER'S OFFICIAL TRADE DESIGNATION */}
                   <div
-                    className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg border text-[10px] font-black uppercase tracking-wide shadow-xs ${tradeInfo.badgeBg} ${tradeInfo.badgeBorder} ${tradeInfo.badgeText}`}
+                    className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-lg border text-xs font-black uppercase tracking-wide shadow-xs ${tradeInfo.badgeBg} ${tradeInfo.badgeBorder} ${tradeInfo.badgeText}`}
                   >
                     {tradeInfo.icon}
                     <span>{tradeInfo.designation}</span>
@@ -302,28 +287,16 @@ export const MembershipCardModal: React.FC<MembershipCardModalProps> = ({
                     {workerName}
                   </h3>
 
-                  <div className="text-[11px] text-slate-300 flex items-center gap-1">
+                  <div className="text-xs text-slate-300 flex items-center gap-1">
                     <MapPin className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
                     <span>{communityName}</span>
                   </div>
 
-                  <div className="text-[10px] font-mono text-amber-300 font-bold">
+                  <div className="text-[11px] font-mono text-amber-300 font-bold">
                     ID: {cardMemberId} • {experienceYears} Yrs Experience
                   </div>
                 </div>
               </div>
-
-              {/* Craftsman Passion & Trade Ethos Callout */}
-              <div className="bg-white/5 border border-white/10 rounded-2xl p-3 text-xs space-y-1">
-                <div className="flex items-center gap-1.5 text-amber-400 font-extrabold text-[11px] uppercase tracking-wide">
-                  <Sparkles className="w-3.5 h-3.5" />
-                  <span>Artisan Craft & Passion:</span>
-                </div>
-                <p className="text-slate-200 text-[11px] leading-relaxed font-medium italic">
-                  "{tradeInfo.passion}"
-                </p>
-              </div>
-
             </div>
 
             {/* Verified Credentials & Social Security Shield */}
