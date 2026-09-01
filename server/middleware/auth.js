@@ -21,9 +21,25 @@ function authenticateToken(req, res, next) {
 
     req.user = user;
 
-    // If user is worker, fetch worker record too
+    // If user is worker, fetch worker record with cooperative and trade skills
     if (user.role === 'worker') {
-      const worker = db.prepare('SELECT * FROM workers WHERE user_id = ?').get(user.id);
+      const worker = db.prepare(`
+        SELECT w.*, coop.name as cooperative_name, coop.registration_no as cooperative_reg_no, c.name as community_name
+        FROM workers w
+        JOIN cooperatives coop ON w.cooperative_id = coop.id
+        LEFT JOIN communities c ON w.community_id = c.id
+        WHERE w.user_id = ?
+      `).get(user.id);
+      if (worker) {
+        const skills = db.prepare(`
+          SELECT ws.*, sc.name as category_name, sc.slug as category_slug
+          FROM worker_skills ws
+          JOIN service_categories sc ON ws.category_id = sc.id
+          WHERE ws.worker_id = ?
+        `).all(worker.id);
+        worker.skills = skills;
+        worker.primary_trade = skills[0]?.category_name || skills[0]?.skill_name || 'Master Tradesman';
+      }
       req.worker = worker;
     }
 

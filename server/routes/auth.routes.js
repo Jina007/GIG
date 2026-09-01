@@ -110,12 +110,22 @@ router.get('/demo-login/:persona', (req, res) => {
   let workerProfile = null;
   if (user.role === 'worker') {
     workerProfile = db.prepare(`
-      SELECT w.*, coop.name as cooperative_name, c.name as community_name 
+      SELECT w.*, coop.name as cooperative_name, coop.registration_no as cooperative_reg_no, c.name as community_name 
       FROM workers w
       JOIN cooperatives coop ON w.cooperative_id = coop.id
       LEFT JOIN communities c ON w.community_id = c.id
       WHERE w.user_id = ?
     `).get(user.id);
+    if (workerProfile) {
+      const skills = db.prepare(`
+        SELECT ws.*, sc.name as category_name, sc.slug as category_slug
+        FROM worker_skills ws
+        JOIN service_categories sc ON ws.category_id = sc.id
+        WHERE ws.worker_id = ?
+      `).all(workerProfile.id);
+      workerProfile.skills = skills;
+      workerProfile.primary_trade = skills[0]?.category_name || skills[0]?.skill_name || 'Master Craftsman';
+    }
   }
 
   const token = jwt.sign(

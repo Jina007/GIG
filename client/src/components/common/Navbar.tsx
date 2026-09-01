@@ -66,7 +66,6 @@ export const Navbar: React.FC<NavbarProps> = ({
         { id: 'map', label: 'Explore Map', icon: Map },
         { id: 'favorites', label: 'Favorite Workers', icon: Heart },
         { id: 'complaints', label: 'Support & Disputes', icon: FileText },
-        { id: 'member-card', label: 'Member Card', icon: CreditCard },
       ];
     }
     if (user.role === 'worker') {
@@ -74,7 +73,7 @@ export const Navbar: React.FC<NavbarProps> = ({
         { id: 'worker-dashboard', label: 'Jobs & Live Queue', icon: Briefcase },
         { id: 'worker-welfare', label: 'Welfare & Insurance', icon: HeartHandshake },
         { id: 'announcements', label: 'Society Notices', icon: Megaphone },
-        { id: 'member-card', label: 'Member Card', icon: CreditCard },
+        { id: 'member-card', label: 'Craftsman ID Card', icon: CreditCard },
       ];
     }
     if (user.role === 'cooperative_admin') {
@@ -160,15 +159,15 @@ export const Navbar: React.FC<NavbarProps> = ({
           {/* Right Actions */}
           <div className="flex items-center gap-2">
             
-            {/* Direct Member Card Button for Customers and Workers */}
-            {(!user || user.role === 'customer' || user.role === 'worker') && (
+            {/* Direct Craftsman ID Card Button (ONLY for Workers) */}
+            {user?.role === 'worker' && (
               <button
                 onClick={onOpenMemberCard}
                 className="flex items-center gap-1.5 bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-300 font-extrabold text-xs px-3 py-1.5 rounded-xl shadow-2xs transition-all active:scale-95 shrink-0"
-                title="View Official Cooperative Member Identity Card"
+                title="View Official Certified Craftsman Identity Card"
               >
                 <CreditCard className="w-3.5 h-3.5 text-amber-600" />
-                <span className="hidden sm:inline">Member Card</span>
+                <span className="hidden sm:inline">Craftsman ID</span>
               </button>
             )}
 

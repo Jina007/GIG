@@ -195,6 +195,10 @@ export const WorkerTrustProfileModal: React.FC<WorkerTrustProfileModalProps> = (
             cooperative_name: profileData.worker.cooperative_name,
             community_name: profileData.worker.community_name,
             cooperative_reg_no: profileData.worker.cooperative_reg_no,
+            experience_years: profileData.worker.experience_years,
+            skills: profileData.worker.skills || profileData.skills,
+            primary_trade: profileData.worker.primary_trade || (profileData.skills && profileData.skills[0]?.skill_name),
+            is_emergency_ready: profileData.worker.is_emergency_ready,
           }}
         />
       )}

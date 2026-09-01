@@ -19,8 +19,10 @@ import {
   Sparkles,
   AlertCircle,
   BellRing,
+  CreditCard,
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
+import { MembershipCardModal } from '../common/MembershipCardModal';
 
 export const WorkerDashboard: React.FC = () => {
   const { user, worker, refreshUserData, demoLogin } = useAuth();
@@ -31,6 +33,7 @@ export const WorkerDashboard: React.FC = () => {
   const [isEmergencyReady, setIsEmergencyReady] = useState<boolean>(worker?.is_emergency_ready === 1);
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState(false);
+  const [showCardModal, setShowCardModal] = useState<boolean>(false);
   const hasChimed = useRef(false);
 
   // Play subtle pleasant chime on incoming dispatch
@@ -180,6 +183,15 @@ export const WorkerDashboard: React.FC = () => {
           >
             <Zap className="w-3.5 h-3.5 fill-current" />
             <span>{isEmergencyReady ? 'Emergency SOS: ON' : 'Emergency: OFF'}</span>
+          </button>
+
+          <button
+            onClick={() => setShowCardModal(true)}
+            className="flex-1 sm:flex-none flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-2xl bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-300 font-extrabold text-xs shadow-2xs transition-all active:scale-95 shrink-0"
+            title="View Official Cooperative Craftsman ID Card"
+          >
+            <CreditCard className="w-3.5 h-3.5 text-amber-600" />
+            <span>My Member Card</span>
           </button>
         </div>
       </div>
@@ -388,6 +400,11 @@ export const WorkerDashboard: React.FC = () => {
             ))}
         </div>
       </div>
+
+      <MembershipCardModal
+        isOpen={showCardModal}
+        onClose={() => setShowCardModal(false)}
+      />
 
     </div>
   );
